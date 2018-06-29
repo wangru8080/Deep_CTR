@@ -1,5 +1,5 @@
 ### Wide&Deep结构图
-![]()
+![Wide&Deep结构图](https://github.com/wangru8080/Deep_CTR/blob/master/picture/Wide%26Deep%E7%BB%93%E6%9E%84%E5%9B%BE.png)
 
 ### Wide Part  
 ![Wide](https://github.com/wangru8080/Deep_CTR/blob/master/picture/wide.png)
