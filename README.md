@@ -15,4 +15,7 @@
 > * NFM: [Neural Factorization Machines for Sparse Predictive Analytics](http://www.comp.nus.edu.sg/~xiangnan/papers/sigir17-nfm.pdf)  
 论文讲解： https://zhuanlan.zhihu.com/p/38613747  
 
+### 实验效果
+[Wide&Deep]()
+
 目前整理代码中。。。
