@@ -95,7 +95,6 @@ def wide_part(train, test, continuous_feature, category_feature, cross_cols, tar
     dummy_cols = [col for col in category_feature + list(crossed_columns.keys())]
     data = pd.get_dummies(data, columns = [x for x in dummy_cols])
     
-    # 归一化
     scaler = MinMaxScaler()
     for feature in continuous_feature:
         data[feature] = scaler.fit_transform(data[feature].values.reshape(-1, 1))
@@ -193,7 +192,6 @@ def deep_part(train, test, embedding_cols, continuous_cols, target, model_type, 
         embedding = concatenate(embedding_layer)
         flatten = Flatten()(embedding)
         bn = BatchNormalization()(flatten)
-        # 按照wide&deep论文来构造网络结构，存在的问题，数据量大小不一样，效果会不一样
         dense = Dense(100, activation='relu')(bn)
         dense = Dense(50, activation='relu')(dense)
         out = Dense(y_train.shape[1], activation = activation)(dense)
