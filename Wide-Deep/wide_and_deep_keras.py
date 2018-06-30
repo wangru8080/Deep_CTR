@@ -48,24 +48,13 @@ def cross_columns(cols):
         crossed_columns[name] = cross
     return crossed_columns
 
-# helper to index categorical columns before embeddings -> labelencoder
+# helper to get unique feature value
 def val2idx(df, cols):
-    val_types = dict()
-    for c in cols:
-        val_types[c] = df[c].unique()
-   
-    val_to_idx = dict()
-    for k in val_types.keys(): # 构建索引列表
-        val_to_idx[k] = {val: i for i, val in enumerate(val_types[k])}
-
-    for k, v in val_to_idx.items(): # df_val to index
-        df[k] = df[k].apply(lambda x: v[x])
-    
     unique_vals = dict()
-    for c in cols: # 得到当前列非重复值个数
+    for c in cols: 
         unique_vals[c] = df[c].nunique()
 
-    return df, unique_vals
+    return unique_vals
 
 def onehot(x):
     return np.array(OneHotEncoder().fit_transform(x).todense())
@@ -156,7 +145,7 @@ def deep_part(train, test, embedding_cols, continuous_cols, target, model_type, 
     test['is_train'] = 0
     data = pd.concat([train, test], axis = 0)
 
-    data, unique_vals = val2idx(data, embedding_cols)
+    unique_vals = val2idx(data, embedding_cols)
     train = data[data['is_train'] == 1].drop('is_train', axis=1)
     test = data[data['is_train'] == 0].drop('is_train', axis=1)
 
