@@ -165,7 +165,8 @@ def deep_part(train, test, embedding_cols, continuous_cols, target, model_type, 
         ipt, reshape = continuous_input(layer_name)
         continuous_tensors.append((ipt, reshape))
         del (ipt, reshape)
-    
+        
+    print('start cut deep_part datasets')
     y_train = train[target].values.reshape(-1, 1)
     train.drop(target, axis = 1, inplace = True)
     train = [train[c] for c in deep_cols]
