@@ -14,7 +14,8 @@
 论文讲解： https://zhuanlan.zhihu.com/p/38517948  
 > * NFM: [Neural Factorization Machines for Sparse Predictive Analytics](http://www.comp.nus.edu.sg/~xiangnan/papers/sigir17-nfm.pdf)  
 论文讲解： https://zhuanlan.zhihu.com/p/38613747  
-
+> * xDeepFM: [xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems](https://arxiv.org/pdf/1803.05170.pdf)  
+论文讲解：https://zhuanlan.zhihu.com/p/39605775
 ### 实验效果
 1、 [Wide&Deep](https://github.com/wangru8080/Deep_CTR/tree/master/Wide-Deep)
 
