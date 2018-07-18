@@ -142,7 +142,7 @@ class Wide_Deep:
                         self.concat_input: self.train[i: i + self.batch_size],
                         self.label: self.y_train[i: i + self.batch_size]
                     }
-                    _, cost= self.sess.run([self.optimizer, self.loss], feed_dict=feed_dict)
+                    cost, opt = self.sess.run([self.loss, self.optimizer], feed_dict=feed_dict)
 
                 print('Epoch=%s, cost=%s' % (epoch + 1, cost))
     
