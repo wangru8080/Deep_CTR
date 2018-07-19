@@ -5,6 +5,11 @@ from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from sklearn.metrics import roc_auc_score, accuracy_score, log_loss, mean_squared_error
 
 class Wide_Deep:
+    '''
+    optimizer_type: adam, adagrad, gd, momentum, rmsprop
+    loss_type: logloss, mse
+    metric_type: auc, accuracy, logloss, rmse
+    '''
     def __init__(self, continuous_feature, category_feature, cross_feature=[], embedding_size=8, deep_layers=[32, 32],
                  dropout_deep=[0.5, 0.5, 0.5], deep_layers_activation=tf.nn.relu, epochs=10, batch_size=128, learning_rate=0.001, optimizer_type='adam',
                  random_seed=2018, loss_type='logloss', metric_type='auc', l2_reg=0.0):
