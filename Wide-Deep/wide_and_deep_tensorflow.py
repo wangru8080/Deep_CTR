@@ -4,6 +4,7 @@ import tensorflow as tf
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from sklearn.metrics import roc_auc_score, accuracy_score, log_loss, mean_squared_error
 import time
+from tensorflow.contrib.layers.python.layers import batch_norm
 
 class Wide_Deep:
     '''
@@ -93,9 +94,9 @@ class Wide_Deep:
                 # for i in range(len(self.deep_layers)):
                 #     self.deep_out = tf.add(tf.matmul(self.deep_out, weights['deep_layer_%s' % i]), biases['deep_layer_bias_%s' % i])
                 #     self.deep_out = self.deep_layers_activation(self.deep_out)
-                self.deep_out = tf.keras.layers.Dense(32, activation='relu')(self.input)
+                self.deep_out = tf.keras.layers.Dense(self.deep_layers[0], activation='relu')(self.input)
                 for i in range(1, num_layer):
-                    self.deep_out = tf.keras.layers.Dense(32, activation='relu')(self.deep_out)
+                    self.deep_out = tf.keras.layers.Dense(self.deep_layers[i], activation='relu')(self.deep_out)
 
 
             with tf.name_scope('concat_wide_deep'):
