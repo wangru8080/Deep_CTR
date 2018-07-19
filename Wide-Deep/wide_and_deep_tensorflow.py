@@ -80,7 +80,7 @@ class Wide_Deep:
                 weights['deep_layer_0'] = tf.Variable(tf.random_normal([self.feature_size, self.deep_layers[0]]))
                 biases['deep_layer_bias_0'] = tf.Variable(tf.random_normal([self.deep_layers[0]]))
                 for i in range(1, num_layer):
-                    weights['deep_layer_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i -1], self.deep_layers[i]]))
+                    weights['deep_layer_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i - 1], self.deep_layers[i]]))
                     biases['deep_layer_bias_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i]]))
 
                 self.deep_out = tf.reshape(self.concat_input, shape=[-1, self.feature_size])
