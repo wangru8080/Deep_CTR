@@ -95,9 +95,9 @@ class Wide_Deep:
                     self.deep_out = tf.add(tf.matmul(self.deep_out, weights['deep_layer_%s' % i]), biases['deep_layer_bias_%s' % i])
                     self.deep_out = self.deep_layers_activation(self.deep_out)
 
-                # self.deep_out = tf.keras.layers.Dense(self.deep_layers[0], activation='relu')(self.input)
+                # self.deep_out = tf.keras.layers.Dense(self.deep_layers[0], activation=self.deep_layers_activation)(self.input)
                 # for i in range(1, num_layer):
-                #     self.deep_out = tf.keras.layers.Dense(self.deep_layers[i], activation='relu')(self.deep_out)
+                #     self.deep_out = tf.keras.layers.Dense(self.deep_layers[i], activation=self.deep_layers_activation)(self.deep_out)
 
 
             with tf.name_scope('concat_wide_deep'):
