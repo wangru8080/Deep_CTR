@@ -84,19 +84,20 @@ class Wide_Deep:
 
             with tf.name_scope('deep_part'):
                 num_layer = len(self.deep_layers)
-                # weights['deep_layer_0'] = tf.Variable(tf.random_normal([self.feature_size, self.deep_layers[0]]))
-                # biases['deep_layer_bias_0'] = tf.Variable(tf.random_normal([self.deep_layers[0]]))
-                # for i in range(1, num_layer):
-                #     weights['deep_layer_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i - 1], self.deep_layers[i]]))
-                #     biases['deep_layer_bias_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i]]))
-                #
-                # self.deep_out = tf.reshape(self.input, shape=[-1, self.feature_size])
-                # for i in range(len(self.deep_layers)):
-                #     self.deep_out = tf.add(tf.matmul(self.deep_out, weights['deep_layer_%s' % i]), biases['deep_layer_bias_%s' % i])
-                #     self.deep_out = self.deep_layers_activation(self.deep_out)
-                self.deep_out = tf.keras.layers.Dense(self.deep_layers[0], activation='relu')(self.input)
+                weights['deep_layer_0'] = tf.Variable(tf.random_normal([self.feature_size, self.deep_layers[0]]))
+                biases['deep_layer_bias_0'] = tf.Variable(tf.random_normal([self.deep_layers[0]]))
                 for i in range(1, num_layer):
-                    self.deep_out = tf.keras.layers.Dense(self.deep_layers[i], activation='relu')(self.deep_out)
+                    weights['deep_layer_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i - 1], self.deep_layers[i]]))
+                    biases['deep_layer_bias_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i]]))
+
+                self.deep_out = tf.reshape(self.input, shape=[-1, self.feature_size])
+                for i in range(len(self.deep_layers)):
+                    self.deep_out = tf.add(tf.matmul(self.deep_out, weights['deep_layer_%s' % i]), biases['deep_layer_bias_%s' % i])
+                    self.deep_out = self.deep_layers_activation(self.deep_out)
+
+                # self.deep_out = tf.keras.layers.Dense(self.deep_layers[0], activation='relu')(self.input)
+                # for i in range(1, num_layer):
+                #     self.deep_out = tf.keras.layers.Dense(self.deep_layers[i], activation='relu')(self.deep_out)
 
 
             with tf.name_scope('concat_wide_deep'):
@@ -117,7 +118,8 @@ class Wide_Deep:
 
             # l2 regularization on weights
             if self.l2_reg > 0:
-                self.loss = self.loss + tf.contrib.layers.l2_regularizer(self.l2_reg)
+                for i in range(len(self.deep_layers)):
+                    self.loss = self.loss + self.l2_reg * (tf.nn.l2_loss(weights['deep_layer_%s' % i]) + tf.nn.l2_loss(weights['deep_layer_bias_%s' % i]))
 
             # optimizer
             if self.optimizer_type == 'adam':
