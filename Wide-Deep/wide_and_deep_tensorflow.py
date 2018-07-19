@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from sklearn.metrics import roc_auc_score, accuracy_score, log_loss, mean_squared_error
+import time
 
 class Wide_Deep:
     '''
@@ -63,16 +64,16 @@ class Wide_Deep:
         self.graph = tf.Graph()
         with self.graph.as_default():
             tf.set_random_seed(self.random_seed)
-
+            self.feature_size = len(self.continuous_feature) + len(self.category_feature) + len(self.cross_feature)
             self.cont_feats = tf.placeholder(tf.float32, shape=[None, None], name='continuous_feature')
             self.cate_feats = tf.placeholder(tf.int32, shape=[None, None], name='category_feature')
             self.cross_feats = tf.placeholder(tf.int32, shape=[None, None], name='cross_feature')
-            self.input = tf.placeholder(tf.float32, shape=[None,  None], name='concat_input')
+            self.input = tf.placeholder(tf.float32, shape=[None,  self.feature_size], name='concat_input')
             self.label = tf.placeholder(tf.float32, shape=[None, 1], name='label')
 
             weights = {}
             biases = {}
-            self.feature_size = len(self.continuous_feature) + len(self.category_feature) + len(self.cross_feature)
+
 
             with tf.name_scope('wide_part'):
                 weights['wide_w'] = tf.Variable(tf.random_normal([self.feature_size, 1]))
@@ -82,16 +83,20 @@ class Wide_Deep:
 
             with tf.name_scope('deep_part'):
                 num_layer = len(self.deep_layers)
-                weights['deep_layer_0'] = tf.Variable(tf.random_normal([self.feature_size, self.deep_layers[0]]))
-                biases['deep_layer_bias_0'] = tf.Variable(tf.random_normal([self.deep_layers[0]]))
+                # weights['deep_layer_0'] = tf.Variable(tf.random_normal([self.feature_size, self.deep_layers[0]]))
+                # biases['deep_layer_bias_0'] = tf.Variable(tf.random_normal([self.deep_layers[0]]))
+                # for i in range(1, num_layer):
+                #     weights['deep_layer_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i - 1], self.deep_layers[i]]))
+                #     biases['deep_layer_bias_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i]]))
+                #
+                # self.deep_out = tf.reshape(self.input, shape=[-1, self.feature_size])
+                # for i in range(len(self.deep_layers)):
+                #     self.deep_out = tf.add(tf.matmul(self.deep_out, weights['deep_layer_%s' % i]), biases['deep_layer_bias_%s' % i])
+                #     self.deep_out = self.deep_layers_activation(self.deep_out)
+                self.deep_out = tf.keras.layers.Dense(32, activation='relu')(self.input)
                 for i in range(1, num_layer):
-                    weights['deep_layer_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i - 1], self.deep_layers[i]]))
-                    biases['deep_layer_bias_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i]]))
+                    self.deep_out = tf.keras.layers.Dense(32, activation='relu')(self.deep_out)
 
-                self.deep_out = tf.reshape(self.input, shape=[-1, self.feature_size])
-                for i in range(len(self.deep_layers)):
-                    self.deep_out = tf.add(tf.matmul(self.deep_out, weights['deep_layer_%s' % i]), biases['deep_layer_bias_%s' % i])
-                    self.deep_out = self.deep_layers_activation(self.deep_out)
 
             with tf.name_scope('concat_wide_deep'):
                 input_size = 1 + self.deep_layers[-1]
@@ -133,8 +138,11 @@ class Wide_Deep:
             self.sess = tf.Session()
             self.sess.run(init)
 
+            total_time = 0
+
             # train
             for epoch in range(self.epochs):
+                start_time = time.time()
                 for i in range(0, len(self.train), self.batch_size):
                     batch_x, batch_y = self.train[i: i + self.batch_size], self.y_train[i: i + self.batch_size]
                     feed_dict = {
@@ -144,7 +152,9 @@ class Wide_Deep:
                     cost, opt = self.sess.run([self.loss, self.optimizer], feed_dict=feed_dict)
                 pred = self.predict(batch_x)
                 auc = self.evaluate(batch_x, batch_y)
-                print('Epoch=%s, cost=%s, auc=%s' % (epoch + 1, cost, auc))
+                end_time = time.time()
+                total_time = total_time + end_time - start_time
+                print('Epoch=%s, cost=%s, auc=%s, time=%s s' % (epoch + 1, cost, auc, total_time))
     
     def predict(self, train):
         feed_dict = {
