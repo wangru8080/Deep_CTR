@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, accuracy_score, log_loss, mean_squared_error
 
 class Wide_Deep:
     def __init__(self, continuous_feature, category_feature, cross_feature=[], embedding_size=8, deep_layers=[32, 32],
@@ -62,18 +62,18 @@ class Wide_Deep:
             self.cont_feats = tf.placeholder(tf.float32, shape=[None, None], name='continuous_feature')
             self.cate_feats = tf.placeholder(tf.int32, shape=[None, None], name='category_feature')
             self.cross_feats = tf.placeholder(tf.int32, shape=[None, None], name='cross_feature')
-            self.feature_size = len(self.continuous_feature) + len(self.category_feature) + len(self.cross_feature)
-            self.concat_input = tf.placeholder(tf.float32, shape=[None,  self.feature_size], name='concat_input')
+            self.input = tf.placeholder(tf.float32, shape=[None,  None], name='concat_input')
             self.label = tf.placeholder(tf.float32, shape=[None, 1], name='label')
 
             weights = {}
             biases = {}
+            self.feature_size = len(self.continuous_feature) + len(self.category_feature) + len(self.cross_feature)
 
             with tf.name_scope('wide_part'):
                 weights['wide_w'] = tf.Variable(tf.random_normal([self.feature_size, 1]))
                 biases['wide_b'] = tf.Variable(tf.random_normal([1]))
 
-                self.wide_out = tf.add(tf.matmul(self.concat_input, weights['wide_w']), biases['wide_b'])
+                self.wide_out = tf.add(tf.matmul(self.input, weights['wide_w']), biases['wide_b'])
 
             with tf.name_scope('deep_part'):
                 num_layer = len(self.deep_layers)
@@ -83,7 +83,7 @@ class Wide_Deep:
                     weights['deep_layer_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i - 1], self.deep_layers[i]]))
                     biases['deep_layer_bias_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i]]))
 
-                self.deep_out = tf.reshape(self.concat_input, shape=[-1, self.feature_size])
+                self.deep_out = tf.reshape(self.input, shape=[-1, self.feature_size])
                 for i in range(len(self.deep_layers)):
                     self.deep_out = tf.add(tf.matmul(self.deep_out, weights['deep_layer_%s' % i]), biases['deep_layer_bias_%s' % i])
                     self.deep_out = self.deep_layers_activation(self.deep_out)
@@ -124,13 +124,6 @@ class Wide_Deep:
             elif self.optimizer_type == 'rmsprop':
                 self.optimizer = tf.train.RMSPropOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
 
-            # metric
-            if self.metric_type == 'auc':
-                self.metric = tf.metrics.auc(self.label, self.out)
-
-            elif self.metric_type == 'accuracy':
-                self.metric = tf.metrics.accuracy(self.label, self.out)
-
             init = tf.global_variables_initializer()
             self.sess = tf.Session()
             self.sess.run(init)
@@ -138,16 +131,34 @@ class Wide_Deep:
             # train
             for epoch in range(self.epochs):
                 for i in range(0, len(self.train), self.batch_size):
+                    batch_x, batch_y = self.train[i: i + self.batch_size], self.y_train[i: i + self.batch_size]
                     feed_dict = {
-                        self.concat_input: self.train[i: i + self.batch_size],
-                        self.label: self.y_train[i: i + self.batch_size]
+                        self.input: batch_x,
+                        self.label: batch_y
                     }
                     cost, opt = self.sess.run([self.loss, self.optimizer], feed_dict=feed_dict)
-
-                print('Epoch=%s, cost=%s' % (epoch + 1, cost))
+                pred = self.predict(batch_x)
+                auc = self.evaluate(batch_x, batch_y)
+                print('Epoch=%s, cost=%s, auc=%s' % (epoch + 1, cost, auc))
     
-    def predict(self):
-        pass
+    def predict(self, train):
+        feed_dict = {
+            self.input: train
+        }
+        y_pred = self.sess.run(self.out, feed_dict=feed_dict)
+        return y_pred
+
+    def evaluate(self, train, label):
+        y_pred = self.predict(train)
+        if self.metric_type == 'auc':
+            metric = roc_auc_score(label, y_pred)
+        elif self.metric_type == 'accuracy':
+            metric = accuracy_score(label, y_pred)
+        elif self.metric_type == 'logloss':
+            metric = log_loss(label, y_pred)
+        elif self.metric_type == 'rmse':
+            metric = mean_squared_error(label, y_pred)
+        return metric
 
 if __name__ == '__main__':
     print('读取数据...')
