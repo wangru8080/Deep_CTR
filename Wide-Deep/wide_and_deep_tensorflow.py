@@ -83,7 +83,7 @@ class Wide_Deep:
             biases = {}
 
 
-                        with tf.name_scope('wide_part'):
+            with tf.name_scope('wide_part'):
                 weights['wide_w'] = tf.Variable(tf.random_normal([self.feature_size, 1]))
                 biases['wide_b'] = tf.Variable(tf.random_normal([1]))
 
