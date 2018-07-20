@@ -8,7 +8,7 @@ from tensorflow.contrib.layers.python.layers import batch_norm
 
 '''
 wide part: auc = 0.75459
-deep part: auc = 0.885174
+deep part: auc = 0.884293
 wide&deep: auc = 0.88815
 '''
 
