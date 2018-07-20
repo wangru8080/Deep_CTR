@@ -8,6 +8,7 @@ from tensorflow.contrib.layers.python.layers import batch_norm
 
 class Wide_Deep:
     '''
+    
     optimizer_type: adam, adagrad, gd, momentum, rmsprop
     loss_type: logloss, mse
     metric_type: auc, accuracy, logloss, rmse
