@@ -6,6 +6,12 @@ from sklearn.metrics import roc_auc_score, accuracy_score, log_loss, mean_square
 import time
 from tensorflow.contrib.layers.python.layers import batch_norm
 
+'''
+wide part: auc = 0.75459
+deep part: auc = 0.885174
+wide&deep: auc = 0.88815
+'''
+
 class Wide_Deep:
     '''
     
@@ -70,39 +76,41 @@ class Wide_Deep:
             self.cont_feats = tf.placeholder(tf.float32, shape=[None, None], name='continuous_feature')
             self.cate_feats = tf.placeholder(tf.int32, shape=[None, None], name='category_feature')
             self.cross_feats = tf.placeholder(tf.int32, shape=[None, None], name='cross_feature')
-            self.input = tf.placeholder(tf.float32, shape=[None,  self.feature_size], name='concat_input')
+            self.input = tf.placeholder(tf.float32, shape=[None,  self.feature_size], name='input')
             self.label = tf.placeholder(tf.float32, shape=[None, 1], name='label')
 
             weights = {}
             biases = {}
 
 
-            with tf.name_scope('wide_part'):
+                        with tf.name_scope('wide_part'):
                 weights['wide_w'] = tf.Variable(tf.random_normal([self.feature_size, 1]))
                 biases['wide_b'] = tf.Variable(tf.random_normal([1]))
 
-                self.wide_out = tf.add(tf.matmul(self.input, weights['wide_w']), biases['wide_b'])
+                # self.wide_out = tf.add(tf.matmul(self.input, weights['wide_w']), biases['wide_b'])
+                self.wide_out = self.input
 
             with tf.name_scope('deep_part'):
                 num_layer = len(self.deep_layers)
-                weights['deep_layer_0'] = tf.Variable(tf.random_normal([self.feature_size, self.deep_layers[0]]))
-                biases['deep_layer_bias_0'] = tf.Variable(tf.random_normal([self.deep_layers[0]]))
-                for i in range(1, num_layer):
-                    weights['deep_layer_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i - 1], self.deep_layers[i]]))
-                    biases['deep_layer_bias_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i]]))
-
-                self.deep_out = tf.reshape(self.input, shape=[-1, self.feature_size])
-                for i in range(len(self.deep_layers)):
-                    self.deep_out = tf.add(tf.matmul(self.deep_out, weights['deep_layer_%s' % i]), biases['deep_layer_bias_%s' % i])
-                    self.deep_out = self.deep_layers_activation(self.deep_out)
-
-                # self.deep_out = tf.keras.layers.Dense(self.deep_layers[0], activation=self.deep_layers_activation)(self.input)
+                # weights['deep_layer_0'] = tf.Variable(tf.random_normal([self.feature_size, self.deep_layers[0]]))
+                # biases['deep_layer_bias_0'] = tf.Variable(tf.random_normal([self.deep_layers[0]]))
                 # for i in range(1, num_layer):
-                #     self.deep_out = tf.keras.layers.Dense(self.deep_layers[i], activation=self.deep_layers_activation)(self.deep_out)
+                #     weights['deep_layer_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i - 1], self.deep_layers[i]]))
+                #     biases['deep_layer_bias_%s' % i] = tf.Variable(tf.random_normal([self.deep_layers[i]]))
+                #
+                # self.deep_out = tf.reshape(self.input, shape=[-1, self.feature_size])
+                # for i in range(len(self.deep_layers)):
+                #     self.deep_out = tf.add(tf.matmul(self.deep_out, weights['deep_layer_%s' % i]), biases['deep_layer_bias_%s' % i])
+                #     self.deep_out = self.deep_layers_activation(self.deep_out)
+
+                self.deep_out = tf.keras.layers.Dense(self.deep_layers[0], activation=self.deep_layers_activation)(self.input)
+                for i in range(1, num_layer):
+                    self.deep_out = tf.keras.layers.Dense(self.deep_layers[i], activation=self.deep_layers_activation)(self.deep_out)
 
 
             with tf.name_scope('concat_wide_deep'):
-                input_size = 1 + self.deep_layers[-1]
+                # input_size = 1 + self.deep_layers[-1]
+                input_size = self.feature_size + self.deep_layers[-1]
                 weights['concat_projection'] = tf.Variable(tf.random_normal([input_size, 1]), dtype=np.float32)
                 biases['concat_bias'] = tf.Variable(tf.constant(0.01), dtype=np.float32)
                 concat_input = tf.concat([self.wide_out, self.deep_out], axis=1)
