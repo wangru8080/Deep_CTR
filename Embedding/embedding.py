@@ -3,7 +3,8 @@ import tensorflow as tf
 import gc
 
 class Embedding:
-    def __init__(self, category_feature, continuous_feature, ignore_feature=[], feature_dict={}, feature_size=0 , field_size=0, embedding_size=8):
+    def __init__(self, category_feature, continuous_feature, ignore_feature=[], feature_dict={}, feature_size=0 , field_size=0, 
+                 embedding_size=8):
         self.feature_dict = feature_dict
         self.feature_size = feature_size
         self.field_size = field_size
@@ -130,9 +131,6 @@ class Embedding:
                 print('value=', embedds)
 
         return embedding
-
-
-
 
 if __name__ == '__main__':
     train = pd.read_csv('data/train.csv')
