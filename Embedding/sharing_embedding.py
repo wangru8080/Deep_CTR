@@ -4,6 +4,8 @@
 import pandas as pd
 import tensorflow as tf
 import gc
+import warnings
+warnings.filterwarnings('ignore')
 
 class SharingEmbedding:
     def __init__(self, category_feature, continuous_feature, ignore_feature=[], feature_dict={}, feature_size=0 , field_size=0, embedding_size=8, random_seed=2018):
@@ -134,12 +136,10 @@ class SharingEmbedding:
                     self.feature_value: Xv
                 }
                 embedds = sess.run(self.embedding, feed_dict=feed_dict)
-                print('shape=', embedds.shape)
                 print('value=', embedds)
+                print('shape=', embedds.shape)
 
         return self.embedding
-
-
 
 if __name__ == '__main__':
     train = pd.read_csv('data/train.csv')
