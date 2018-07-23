@@ -146,4 +146,4 @@ if __name__ == '__main__':
     embedding = Embedding(category_feature=category_feature, ignore_feature=ignore_feature, continuous_feature=continuous_feature)
     embedding.FeatureDictionary(train, test)
     Xi, Xv, y = embedding.parse(train)
-    embedding.to_embedding_vector(Xi, Xv, isPrintEmbeddingInfo=True)
+    embedding.to_sharing_embedding_vector(Xi, Xv, isPrintEmbeddingInfo=True)
