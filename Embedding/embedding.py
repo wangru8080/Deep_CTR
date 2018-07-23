@@ -71,7 +71,7 @@ class Embedding:
         self.embedding = tf.nn.embedding_lookup(weights['category_embedding'], ids=self.cate_index) # [None, category_field_size, embedding_size]
         self.embedding = tf.reshape(self.embedding, shape=[-1, self.category_field_size * self.embedding_size]) # [None, category_field_size * embedding_size]
         # concat Embedding Vector & continuous -> Dense Vector
-        self.embedding = tf.concat([self.embedding, self.continuous], axis=1)
+        self.dense_vector = tf.concat([self.embedding, self.continuous], axis=1)
 
         if isPrintEmbeddingInfo:
             init = tf.global_variables_initializer()
