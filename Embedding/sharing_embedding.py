@@ -6,7 +6,7 @@ import tensorflow as tf
 import gc
 
 class SharingEmbedding:
-    def __init__(self, category_feature, continuous_feature, ignore_feature=[], feature_dict={}, feature_size=0 , field_size=0, embedding_size=8):
+    def __init__(self, category_feature, continuous_feature, ignore_feature=[], feature_dict={}, feature_size=0 , field_size=0, embedding_size=8, random_seed=2018):
         self.feature_dict = feature_dict
         self.feature_size = feature_size
         self.field_size = field_size
@@ -14,6 +14,7 @@ class SharingEmbedding:
         self.category_feature = category_feature
         self.continuous_feature = continuous_feature
         self.embedding_size = embedding_size
+        self.random_seed= random_seed
 
     def FeatureDictionary(self, train, test):
         '''
@@ -24,7 +25,7 @@ class SharingEmbedding:
         train: 原始训练集
         test:  原始测试集
         continuous_feature: 所有数值型特征
-        ignore_feature:  所有忽略的特征. 除了数值型和忽略的，剩下的全部认为是离散型
+        ignore_feature: 所有忽略的特征. 除了数值型和忽略的，剩下的全部认为是离散型
         feat_dict, feat_size
              1. feat_size: one-hot之后总的特征维度。
              2. feat_dict是一个{}， key是特征string的col_name, value可能是编号（int），可能也是一个字典。
@@ -108,6 +109,8 @@ class SharingEmbedding:
             return Xi, Xv, ids
 
     def to_sharing_embedding_vector(self, Xi, Xv, isPrintEmbeddingInfo=False): # category_feature与continuous_feature共享embedding
+
+        tf.set_random_seed(self.random_seed)
 
         self.feature_index = tf.placeholder(tf.int32, shape=[None, self.field_size])
         self.feature_value = tf.placeholder(tf.float32, shape=[None, self.field_size])
