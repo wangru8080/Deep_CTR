@@ -116,6 +116,8 @@ class Embedding:
 
         # Sparse Features -> Dense Embedding
         embedding = tf.nn.embedding_lookup(weights['feature_embedding'], ids=feature_index) # [None, field_size, embedding_size]
+        feature_value  tf.reshape(feature_value, shape=[-1, self.field_size, 1])
+        embedding = tf.multiply(embedding, feature_value)
         embedding = tf.reshape(embedding, shape=[-1, self.field_size * self.embedding_size]) # [None, field_size * embedding_size]
 
         if isPrintEmbeddingInfo:
