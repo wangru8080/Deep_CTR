@@ -7,4 +7,6 @@
 ### category_feature与continuous_feature共享Embedding的做法
 对continuous_feature与category_feature一起编号，对于continuous_feature仅用一个编号来表示，而category_feature涉及到有多个取值，所以一个category_feature对应多个编号，而这多个编号组成一个field。  
 如果category_feature中取值少，就直接编号。多的话可采用hash处理，这样避免了过多的加法运算。  
-然后category_feature与continuous_feature一起进行embedding，所以最终需要将feature_value的值与Embedding矩阵对应元素的值相乘，不同于矩阵相乘（tf.multiply），得到最终的Embedding Vector
+然后category_feature与continuous_feature一起进行embedding，所以最终需要将feature_value的值与Embedding矩阵对应元素的值相乘，不同于矩阵相乘（tf.multiply），得到最终的Embedding Vector  
+如图所示：  
+![](https://github.com/wangru8080/Deep_CTR/blob/master/picture/sharing_embedding.png)
