@@ -81,9 +81,9 @@ class Embedding:
                     self.cate_index: category_index,
                     self.continuous: df[self.continuous_feature].values.tolist()
                 }
-                embedds = sess.run(self.embedding, feed_dict=feed_dict)
-                print('value=', embedds)
-                print('shape=', embedds.shape)
+                dense_vector = sess.run(self.dense_vector, feed_dict=feed_dict)
+                print('value=', dense_vector)
+                print('shape=', dense_vector.shape)
 
         return self.embedding
 
