@@ -104,7 +104,7 @@ class Embedding:
         else:
             return Xi, Xv, ids
 
-    def to_embedding_vector(self, Xi, Xv, isPrintEmbeddingInfo=False):
+    def to_sharing_embedding_vector(self, Xi, Xv, isPrintEmbeddingInfo=False): # category_feature与continuous_feature共享embedding
 
         self.feature_index = tf.placeholder(tf.int32, shape=[None, self.field_size])
         self.feature_value = tf.placeholder(tf.float32, shape=[None, self.field_size])
