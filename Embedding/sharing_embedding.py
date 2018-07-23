@@ -2,7 +2,7 @@ import pandas as pd
 import tensorflow as tf
 import gc
 
-class Embedding:
+class SharingEmbedding:
     def __init__(self, category_feature, continuous_feature, ignore_feature=[], feature_dict={}, feature_size=0 , field_size=0, embedding_size=8):
         self.feature_dict = feature_dict
         self.feature_size = feature_size
@@ -143,7 +143,7 @@ if __name__ == '__main__':
     category_feature = ['feat_cat_1', 'feat_cat_2']
     continuous_feature = ['feat_num_1', 'feat_num_2']
 
-    embedding = Embedding(category_feature=category_feature, ignore_feature=ignore_feature, continuous_feature=continuous_feature)
+    embedding = SharingEmbedding(category_feature=category_feature, ignore_feature=ignore_feature, continuous_feature=continuous_feature)
     embedding.FeatureDictionary(train, test)
     Xi, Xv, y = embedding.parse(train)
     embedding.to_sharing_embedding_vector(Xi, Xv, isPrintEmbeddingInfo=True)
