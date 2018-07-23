@@ -3,8 +3,7 @@ import tensorflow as tf
 import gc
 
 class Embedding:
-    def __init__(self, category_feature, continuous_feature, ignore_feature=[], feature_dict={}, feature_size=0 , field_size=0, 
-                 embedding_size=8):
+    def __init__(self, category_feature, continuous_feature, ignore_feature=[], feature_dict={}, feature_size=0 , field_size=0, embedding_size=8):
         self.feature_dict = feature_dict
         self.feature_size = feature_size
         self.field_size = field_size
@@ -107,40 +106,42 @@ class Embedding:
 
     def to_embedding_vector(self, Xi, Xv, isPrintEmbeddingInfo=False):
 
-        feature_index = tf.placeholder(tf.int32, shape=[None, self.field_size])
-        feature_value = tf.placeholder(tf.float32, shape=[None, self.field_size])
+        self.feature_index = tf.placeholder(tf.int32, shape=[None, self.field_size])
+        self.feature_value = tf.placeholder(tf.float32, shape=[None, self.field_size])
 
         weights = {}
 
-        weights['feature_embedding'] = tf.Variable(tf.random_normal([self.feature_size, self.embedding_size], mean=0, stddev=0.1))
+        weights['feature_embedding'] = tf.Variable(tf.random_normal([self.feature_size, self.embedding_size], mean=0.0, stddev=0.01))
 
         # Sparse Features -> Dense Embedding
-        embedding = tf.nn.embedding_lookup(weights['feature_embedding'], ids=feature_index) # [None, field_size, embedding_size]
-        feature_value = tf.reshape(feature_value, shape=[-1, self.field_size, 1])
-        embedding = tf.multiply(embedding, feature_value)
-        embedding = tf.reshape(embedding, shape=[-1, self.field_size * self.embedding_size]) # [None, field_size * embedding_size]
+        self.embedding = tf.nn.embedding_lookup(weights['feature_embedding'], ids=self.feature_index) # [None, field_size, embedding_size]
+        feature_value = tf.reshape(self.feature_value, shape=[-1, self.field_size, 1])
+        self.embedding = tf.multiply(self.embedding, feature_value)
+        self.embedding = tf.reshape(self.embedding, shape=[-1, self.field_size * self.embedding_size]) # [None, field_size * embedding_size]
 
         if isPrintEmbeddingInfo:
             init = tf.global_variables_initializer()
             with tf.Session() as sess:
                 sess.run(init)
                 feed_dict = {
-                    feature_index: Xi,
-                    feature_value: Xv
+                    self.feature_index: Xi,
+                    self.feature_value: Xv
                 }
-                embedds = sess.run(embedding, feed_dict=feed_dict)
+                embedds = sess.run(self.embedding, feed_dict=feed_dict)
                 print('shape=', embedds.shape)
                 print('value=', embedds)
 
-        return embedding
+        return self.embedding
+
+
 
 if __name__ == '__main__':
     train = pd.read_csv('data/train.csv')
     test = pd.read_csv('data/test.csv')
 
     ignore_feature = ['id', 'target']
-    category_feature = ['cat_1', 'cat_2']
-    continuous_feature = ['con_1', 'con_2']
+    category_feature = ['feat_cat_1', 'feat_cat_2']
+    continuous_feature = ['feat_num_1', 'feat_num_2']
 
     embedding = Embedding(category_feature=category_feature, ignore_feature=ignore_feature, continuous_feature=continuous_feature)
     embedding.FeatureDictionary(train, test)
