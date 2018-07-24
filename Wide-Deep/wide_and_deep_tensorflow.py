@@ -147,8 +147,8 @@ class Wide_Deep:
                 # for i in range(1, num_layer):
                 #     self.deep_out = tf.keras.layers.Dense(self.deep_layers[i], activation=self.deep_layers_activation)(self.deep_out)
 
-                if self.use_deep and self.use_wide == False:
-                    self.deep_out = tf.keras.layers.Dense(1, activation=None)(self.deep_out)
+                # if self.use_deep and self.use_wide == False:
+                #     self.deep_out = tf.keras.layers.Dense(1, activation=None)(self.deep_out)
 
             with tf.name_scope('wide_deep'):
                 if self.use_wide and self.use_deep:
