@@ -19,7 +19,9 @@ class SharingEmbedding:
         self.random_seed= random_seed
         
     def to_sharing_embedding_vector(self, Xi, Xv, isPrintEmbeddingInfo=False): # category_feature与continuous_feature共享embedding
-
+        '''
+        category_index: 对离散特征中每个不同的取值进行编号，构造出[[idx1, idx2, idx3,..., idxn], [idx1, idx2, idx3,..., idxn], ...[idx1, idx2, idx3,..., idxn]]此结构
+        '''
         tf.set_random_seed(self.random_seed)
 
         self.feature_index = tf.placeholder(tf.int32, shape=[None, self.field_size])
