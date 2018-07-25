@@ -217,6 +217,20 @@ class Wide_Deep:
         return df_cross
 
     def fit(self, category_index, train, label, train_val=None, label_val=None, cate_index_val=None):
+        '''
+        category_index for embedding
+        concat category_embedding & continuous -> Dense input
+
+        :param category_index: [[idx1_1, idx1_2,...], [idx2_1, idx2_2,...],...]
+                                 idxi_j is the feature index of feature field j of sample i in the training set
+        :param train: [[value1_1, value1_2,...], [value2_1, value2_2,...]...]
+                        valuei_j is the feature value of feature field j of sample i in the training set
+        :param label: [[label1], [label2], [label3], [label4],...]
+        :param train_val: list of list of feature indices of each sample in the validation set
+        :param label_val: label of each sample in the validation set
+        :param cate_index_val: list of list of feature indices of each sample in the validation set
+        :return: None
+        '''
         has_valid = train_val is not None
         wide_data_val = None
         if len(self.cross_feature) > 0:
