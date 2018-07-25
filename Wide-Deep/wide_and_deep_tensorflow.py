@@ -9,14 +9,15 @@ from sklearn.metrics import roc_auc_score, accuracy_score, log_loss, mean_square
 import time
 import warnings
 warnings.filterwarnings('ignore')
+from tensorflow.contrib.layers.python.layers import batch_norm as batch_norm
 from DataParse import DataParse
 np.random.seed(2018)
 
 class Wide_Deep:
     def __init__(self, continuous_feature, category_feature, cross_feature=[], ignore_feature=[], category_dict={},
-                 category_size=0, category_field_size=0, embedding_size=8, deep_layers=[32, 32], dropout_deep=[0.5, 0.5, 0.5],
+                 category_size=0, category_field_size=0, embedding_size=8, deep_layers=[32, 32], dropout_deep=[1.0, 1.0, 1.0],
                  deep_layers_activation=tf.nn.relu, epochs=10, batch_size=128,learning_rate=0.001, optimizer_type='adam',
-                 random_seed=2018, loss_type='logloss', metric_type='auc', l2_reg=0.0, use_wide=True, use_deep=True):
+                 random_seed=2018, loss_type='logloss', metric_type='auc', l2_reg=0.0, batch_norm=False, batch_norm_decay=0.995, use_wide=True, use_deep=True):
         self.continuous_feature = continuous_feature
         self.category_feature = category_feature
         self.cross_feature = cross_feature
@@ -36,6 +37,8 @@ class Wide_Deep:
         self.loss_type = loss_type
         self.metric_type = metric_type
         self.l2_reg = l2_reg
+        self.batch_norm = batch_norm
+        self.batch_norm_decay = batch_norm_decay
         self.use_wide = use_wide
         self.use_deep = use_deep
 
@@ -55,6 +58,8 @@ class Wide_Deep:
             self.wide_input = tf.placeholder(tf.float32, [None, self.wide_feature_size], name='wide_data')
             self.deep_input = tf.placeholder(tf.float32, [None, self.deep_feature_size], name='deep_data')
             self.label = tf.placeholder(tf.float32, [None, 1], name='label')
+            self.dropout_keep_deep = tf.placeholder(tf.float32, shape=[None], name='dropout_keep_deep')
+            self.train_phase = tf.placeholder(tf.bool, name='train_phase')
 
             weights = {}
             biases = {}
@@ -100,14 +105,15 @@ class Wide_Deep:
                         np.random.normal(loc=0, scale=glorot, size=(1, self.deep_layers[i])),
                         dtype=np.float32)
 
-                self.deep_out = tf.add(tf.matmul(self.dense_vector, weights['deep_layer_0']),
-                                       biases['deep_layer_bias_0'])
-                self.deep_out = tf.nn.relu(self.deep_out)
-
-                for i in range(1, num_layer):
+                self.deep_out = tf.nn.dropout(self.dense_vector, self.dropout_keep_deep[0])
+                for i in range(0, num_layer):
                     self.deep_out = tf.add(tf.matmul(self.deep_out, weights['deep_layer_%s' % i]),
                                            biases['deep_layer_bias_%s' % i])
+                    if self.batch_norm:
+                        self.deep_out = self.batch_norm_layer(self.deep_out, train_phase=self.train_phase,
+                                                            scope_bn='bn_%s' % i)
                     self.deep_out = tf.nn.relu(self.deep_out)
+                    self.deep_out = tf.nn.dropout(self.deep_out, self.dropout_keep_deep[i + 1])
 
                 if self.use_deep and self.use_wide == False:
                     glorot = np.sqrt(2.0 / (self.deep_layers[-1] + 1))
@@ -225,6 +231,7 @@ class Wide_Deep:
                 wide_data_val = train_val
 
         # train
+        total_time = 0
         for epoch in range(self.epochs):
             start_time = time.time()
             for i in range(0, len(train), self.batch_size):
@@ -238,7 +245,9 @@ class Wide_Deep:
                     self.cont_feats: train_batch_x[self.continuous_feature].values.tolist(),
                     self.wide_input: wide_data_batch_x.values.tolist(),
                     self.deep_input: train_batch_x.values.tolist(),
-                    self.label: batch_y
+                    self.label: batch_y,
+                    self.dropout_keep_deep: self.dropout_deep,
+                    self.train_phase: True
                 }
                 cost, opt = self.sess.run([self.loss, self.optimizer], feed_dict=feed_dict)
             train_metric = self.evaluate(wide_data, train, category_index, label)
@@ -248,13 +257,25 @@ class Wide_Deep:
                 print('[%s] train-%s=%.4f, valid-%s=%.4f [%.1f s]' % (epoch + 1, self.metric_type, train_metric, self.metric_type, valid_metric, end_time - start_time))
             else:
                 print('[%s] train-%s=%.4f [%.1f s]' % (epoch + 1, self.metric_type, train_metric, end_time - start_time))
+            total_time = total_time + end_time - start_time
+        print('cost total time=%.1f s' % total_time)
+
+    def batch_norm_layer(self, x, train_phase, scope_bn):
+        bn_train = batch_norm(x, decay=self.batch_norm_decay, center=True, scale=True, updates_collections=None,
+                              is_training=True, reuse=None, trainable=True, scope=scope_bn)
+        bn_inference = batch_norm(x, decay=self.batch_norm_decay, center=True, scale=True, updates_collections=None,
+                                  is_training=False, reuse=True, trainable=True, scope=scope_bn)
+        z = tf.cond(train_phase, lambda: bn_train, lambda: bn_inference)
+        return z
 
     def predict(self, wide_input, deep_input, category_index):
         feed_dict = {
             self.cate_index: category_index,
             self.cont_feats: deep_input[self.continuous_feature].values.tolist(),
             self.wide_input: wide_input,
-            self.deep_input: deep_input
+            self.deep_input: deep_input,
+            self.dropout_keep_deep: [1.0] * len(self.dropout_deep),
+            self.train_phase: False
         }
         y_pred = self.sess.run(self.out, feed_dict=feed_dict)
         return y_pred
@@ -274,8 +295,8 @@ if __name__ == '__main__':
     print('read dataset...')
     train = pd.read_csv('data/train.csv')
     test = pd.read_csv('data/test.csv')
-    y_train = pd.read_csv('data/y_train.csv').values.reshape(-1, 1)
-    y_val = pd.read_csv('data/y_val.csv').values.reshape(-1, 1)
+    y_train = pd.read_csv('data/y_train.csv')
+    y_val = pd.read_csv('data/y_val.csv')
 
     continuous_feature = ['age', 'fnlwgt', 'education_num', 'capital_gain', 'capital_loss', 'hours_per_week']
     category_feature = ['workclass', 'education', 'marital_status', 'occupation', 'relationship', 'race', 'sex',
@@ -287,12 +308,24 @@ if __name__ == '__main__':
     cat_index = dataParse.parse(train)
     test_cat_index = dataParse.parse(test)
 
+    refit = True
+
     model = Wide_Deep(continuous_feature=continuous_feature,
                       category_feature=category_feature,
                       cross_feature=cross_feature,
+                      batch_norm=True,
                       category_field_size=dataParse.category_field_size,
                       category_size=dataParse.category_size)
-    model.fit(category_index=cat_index, train=train, label=y_train, train_val=test, label_val=y_val, cate_index_val=test_cat_index)
+    if refit:
+        data = pd.concat([train, test], axis=0)
+        label = pd.concat([y_train, y_val], axis=0)
+        label = label.values.reshape(-1, 1)
+        category_index = pd.concat([pd.DataFrame(cat_index), pd.DataFrame(test_cat_index)], axis=0).values.tolist()
+        model.fit(category_index=category_index, train=data, label=label)
+    else:
+        y_train = y_train.values.reshape(-1, 1)
+        y_val = y_val.values.reshape(-1, 1)
+        model.fit(category_index=cat_index, train=train, label=y_train, train_val=test, label_val=y_val, cate_index_val=test_cat_index)
     if len(cross_feature) > 0:
         cross = model.get_cross_feature(test)
         wide_input = pd.concat([test, cross], axis=1)
