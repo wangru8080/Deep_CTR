@@ -7,7 +7,7 @@ import time
 from tensorflow.contrib.layers.python.layers import batch_norm as batch_norm
 from DataParse import DataParse
 from tqdm import tqdm
-
+np.random.seed(2018)
 
 class DeepFM(BaseEstimator, TransformerMixin):
     def __init__(self, feature_size, field_size,
@@ -133,7 +133,7 @@ class DeepFM(BaseEstimator, TransformerMixin):
                         if self.batch_norm:
                             self.deep_out = self.batch_norm_layer(self.deep_out, train_phase=self.train_phase,
                                                                   scope_bn='bn_%s' % i)
-                        self.deep_out = tf.nn.relu(self.deep_out)
+                        self.deep_out = self.deep_layers_activation(self.deep_out)
                         self.deep_out = tf.nn.dropout(self.deep_out, self.dropout_keep_deep[i + 1])
 
                     if self.use_deep and self.use_fm == False:
@@ -166,7 +166,7 @@ class DeepFM(BaseEstimator, TransformerMixin):
 
                 elif self.loss_type == 'mse':
                     self.loss = tf.nn.l2_loss(tf.subtract(self.label, self.out))
-                
+
                 # l2 regularization on weights
                 if self.l2_reg > 0:
                     if self.use_deep:
@@ -174,7 +174,7 @@ class DeepFM(BaseEstimator, TransformerMixin):
                             self.loss = self.loss + self.l2_reg * (
                                     tf.nn.l2_loss(weights['deep_layer_%s' % i]) + tf.nn.l2_loss(
                                 biases['deep_layer_bias_%s' % i]))
-                
+
                 # optimizer
                 if self.optimizer_type == 'adam':
                     self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
