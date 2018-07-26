@@ -3,9 +3,10 @@ import numpy as np
 import tensorflow as tf
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import roc_auc_score, log_loss
-from time import time
+import time
 from tensorflow.contrib.layers.python.layers import batch_norm as batch_norm
 from DataParse import DataParse
+from tqdm import tqdm
 
 
 class DeepFM(BaseEstimator, TransformerMixin):
@@ -154,7 +155,6 @@ class DeepFM(BaseEstimator, TransformerMixin):
                         biases['concat_bias'] = tf.Variable(tf.constant(0.01), dtype=np.float32)
                         concat_input = tf.concat([self.fm_out, self.deep_out], axis=1)
                         self.out = tf.add(tf.matmul(concat_input, weights['concat_projection']), biases['concat_bias'])
-
                     elif self.use_fm:
                         self.out = self.fm_out
                     elif self.use_deep:
@@ -191,7 +191,7 @@ class DeepFM(BaseEstimator, TransformerMixin):
                 self.sess = tf.Session()
                 self.sess.run(init)
 
-    def fit(self, feat_index, feat_val, label):
+    def fit(self, feat_index, feat_val, label, valid_feat_index=None, valid_feat_val=None, valid_label=None):
         '''
 
         :param feat_index: [[idx1_1, idx1_2,...], [idx2_1, idx2_2,...],...]
@@ -201,8 +201,11 @@ class DeepFM(BaseEstimator, TransformerMixin):
         :param label: [[label1], [label2], [label3], [label4],...]
         :return: None
         '''
+        has_valid = valid_feat_index is not None
+        total_time = 0
         for epoch in range(self.epochs):
-            for i in range(0, len(feat_index), self.batch_size):
+            start_time = time.time()
+            for i in tqdm(range(0, len(feat_index), self.batch_size), ncols=100):
                 feat_index_batch = feat_index[i: i + self.batch_size]
                 feat_val_batch = feat_val[i: i + self.batch_size]
                 batch_y = label[i: i + self.batch_size]
@@ -217,7 +220,17 @@ class DeepFM(BaseEstimator, TransformerMixin):
                 }
                 cost, opt = self.sess.run([self.loss, self.optimizer], feed_dict=feed_dict)
             train_metric = self.evaluate(feat_index, feat_val, label)
-            print('[%s] train-%s=%.4f' % (epoch + 1, self.metric_type, train_metric))
+            end_time = time.time()
+            if self.verbose:
+                if has_valid:
+                    valid_metric = self.evaluate(valid_feat_index, valid_feat_val, valid_label)
+                    print('[%s] train-%s=%.4f, valid-%s=%.4f [%.1f s]' % (
+                    epoch + 1, self.metric_type, train_metric, self.metric_type, valid_metric, end_time - start_time))
+                else:
+                    print('[%s] train-%s=%.4f [%.1f s]' % (epoch + 1, self.metric_type, train_metric, end_time - start_time))
+            total_time = total_time + end_time - start_time
+
+        print('cost total time=%.1f s' % total_time)
 
     def batch_norm_layer(self, x, train_phase, scope_bn):
         bn_train = batch_norm(x, decay=self.batch_norm_decay, center=True, scale=True, updates_collections=None,
