@@ -225,7 +225,7 @@ class Wide_Deep(BaseEstimator, TransformerMixin):
         concat category_embedding & continuous -> Dense input
 
         :param category_index: [[idx1_1, idx1_2,...], [idx2_1, idx2_2,...],...]
-                                 idxi_j is the feature index of feature field j of sample i in the training set
+                                 idxi_j is the category index of category field j of sample i in the training set
         :param train: [[value1_1, value1_2,...], [value2_1, value2_2,...]...]
                         valuei_j is the feature value of feature field j of sample i in the training set
         :param label: [[label1], [label2], [label3], [label4],...]
