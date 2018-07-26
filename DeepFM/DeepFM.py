@@ -91,8 +91,8 @@ class DeepFM(BaseEstimator, TransformerMixin):
 
                 #FM_out
                 self.fm_out = tf.concat([self.y_first_order, self.y_second_order], axis=1) # [None, field_size + embedding_size]
-                # biases['fm_w0'] = tf.Variable(tf.random_normal([self.field_size + self.embedding_size]), name='fm_w0')
-                # self.fm_out = tf.add(self.fm_out, biases['fm_w0'])
+                biases['fm_w0'] = tf.Variable(tf.zeros([self.field_size + self.embedding_size]), name='fm_w0')
+                self.fm_out = tf.add(self.fm_out, biases['fm_w0']) # fm = w0 + wX + <vi, vj>X
 
                 if self.use_fm and self.use_deep == False:
                     input_size = self.field_size + self.embedding_size
