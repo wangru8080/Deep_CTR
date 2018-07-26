@@ -4,8 +4,9 @@
 import pandas as pd
 import numpy as np
 import tensorflow as tf
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import roc_auc_score, accuracy_score, log_loss, mean_squared_error
+from sklearn.base import BaseEstimator, TransformerMixin
 import time
 import warnings
 warnings.filterwarnings('ignore')
@@ -13,11 +14,12 @@ from tensorflow.contrib.layers.python.layers import batch_norm as batch_norm
 from DataParse import DataParse
 np.random.seed(2018)
 
-class Wide_Deep:
+class Wide_Deep(BaseEstimator, TransformerMixin):
     def __init__(self, continuous_feature, category_feature, cross_feature=[], ignore_feature=[], category_dict={},
                  category_size=0, category_field_size=0, embedding_size=8, deep_layers=[32, 32], dropout_deep=[1.0, 1.0, 1.0],
                  deep_layers_activation=tf.nn.relu, epochs=10, batch_size=128,learning_rate=0.001, optimizer_type='adam',
-                 random_seed=2018, loss_type='logloss', metric_type='auc', l2_reg=0.0, batch_norm=False, batch_norm_decay=0.995, use_wide=True, use_deep=True):
+                 random_seed=2018, loss_type='logloss', metric_type='auc', l2_reg=0.0, batch_norm=False, batch_norm_decay=0.995, use_wide=True, use_deep=True,
+                 verbose=True):
         self.continuous_feature = continuous_feature
         self.category_feature = category_feature
         self.cross_feature = cross_feature
@@ -41,6 +43,7 @@ class Wide_Deep:
         self.batch_norm_decay = batch_norm_decay
         self.use_wide = use_wide
         self.use_deep = use_deep
+        self.verbose = verbose
 
         self.__init_graph()
 
@@ -266,11 +269,12 @@ class Wide_Deep:
                 cost, opt = self.sess.run([self.loss, self.optimizer], feed_dict=feed_dict)
             train_metric = self.evaluate(wide_data, train, category_index, label)
             end_time = time.time()
-            if has_valid:
-                valid_metric = self.evaluate(wide_data_val, train_val, cate_index_val, label_val)
-                print('[%s] train-%s=%.4f, valid-%s=%.4f [%.1f s]' % (epoch + 1, self.metric_type, train_metric, self.metric_type, valid_metric, end_time - start_time))
-            else:
-                print('[%s] train-%s=%.4f [%.1f s]' % (epoch + 1, self.metric_type, train_metric, end_time - start_time))
+            if self.verbose:
+                if has_valid:
+                    valid_metric = self.evaluate(wide_data_val, train_val, cate_index_val, label_val)
+                    print('[%s] train-%s=%.4f, valid-%s=%.4f [%.1f s]' % (epoch + 1, self.metric_type, train_metric, self.metric_type, valid_metric, end_time - start_time))
+                else:
+                    print('[%s] train-%s=%.4f [%.1f s]' % (epoch + 1, self.metric_type, train_metric, end_time - start_time))
             total_time = total_time + end_time - start_time
         print('cost total time=%.1f s' % total_time)
 
