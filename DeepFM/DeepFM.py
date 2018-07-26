@@ -68,7 +68,7 @@ class DeepFM(BaseEstimator, TransformerMixin):
             weights = {}
             biases = {}
 
-            with tf.name_scope('init'):
+            with tf.name_scope('Embedding_Layer'):
                 weights['feature_embeddings'] = tf.Variable(tf.random_normal([self.feature_size, self.embedding_size], 0.0, 0.01), name='feature_embeddings')
                 self.embeddings = tf.nn.embedding_lookup(weights['feature_embeddings'], self.feature_index)  # [None, field_size, 1]
                 feat_value = tf.reshape(self.feature_value, shape=[-1, self.field_size, 1])  # [None, field_size, 1]
