@@ -166,7 +166,15 @@ class DeepFM(BaseEstimator, TransformerMixin):
 
                 elif self.loss_type == 'mse':
                     self.loss = tf.nn.l2_loss(tf.subtract(self.label, self.out))
-
+                
+                # l2 regularization on weights
+                if self.l2_reg > 0:
+                    if self.use_deep:
+                        for i in range(len(self.deep_layers)):
+                            self.loss = self.loss + self.l2_reg * (
+                                    tf.nn.l2_loss(weights['deep_layer_%s' % i]) + tf.nn.l2_loss(
+                                biases['deep_layer_bias_%s' % i]))
+                
                 # optimizer
                 if self.optimizer_type == 'adam':
                     self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
