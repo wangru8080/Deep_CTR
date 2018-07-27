@@ -18,6 +18,7 @@
 论文讲解：https://zhuanlan.zhihu.com/p/39605775
 ### 实验效果
 1、 [Wide&Deep](https://github.com/wangru8080/Deep_CTR/tree/master/Wide-Deep)  
-2、 [DeepFM](https://github.com/wangru8080/Deep_CTR/tree/master/DeepFM)
+2、 [DeepFM](https://github.com/wangru8080/Deep_CTR/tree/master/DeepFM)  
+3、 [PNN](https://github.com/wangru8080/Deep_CTR/tree/master/PNN)
 
 目前整理代码中。。。
