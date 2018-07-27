@@ -19,6 +19,9 @@
 ### 实验效果
 1、 [Wide&Deep](https://github.com/wangru8080/Deep_CTR/tree/master/Wide-Deep)  
 2、 [DeepFM](https://github.com/wangru8080/Deep_CTR/tree/master/DeepFM)  
-3、 [PNN](https://github.com/wangru8080/Deep_CTR/tree/master/PNN)
+3、 [PNN](https://github.com/wangru8080/Deep_CTR/tree/master/PNN)  
+
+
+  均采用默认参数deep_layer = [32, 32], dropout = [1.0, 1.0, 1.0]
 
 目前整理代码中。。。
