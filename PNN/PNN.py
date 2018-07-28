@@ -80,8 +80,9 @@ class PNN(BaseEstimator, TransformerMixin):
                 else:
                     weights['product-quadratic-outer'] = tf.Variable(tf.random_normal([self.deep_init_size, self.embedding_size, self.embedding_size], 0.0, 0.01))
                 weights['product-linear'] = tf.Variable(tf.random_normal([self.deep_init_size, self.field_size, self.embedding_size], 0.0, 0.01))
-                biases['product-bias'] = tf.Variable(tf.random_normal([self.deep_init_size,],0,0,1.0))
+                biases['product-bias'] = tf.Variable(tf.random_normal([self.deep_init_size],0,0,1.0))
 
+                # linear signals z
                 linear_output = []
                 for i in range(self.deep_init_size):
                     self.linear_product = tf.multiply(self.embeddings, weights['product-linear'][i])
@@ -91,6 +92,7 @@ class PNN(BaseEstimator, TransformerMixin):
 
                 self.lz = tf.concat(linear_output, axis=1)  # [N, deep_init_size]
 
+                # quadratic signals p
                 quadratic_output = []
                 if self.use_inner:
                     for i in range(self.deep_init_size):
@@ -107,6 +109,9 @@ class PNN(BaseEstimator, TransformerMixin):
                 z_add_p = tf.add(self.lp, self.lz)
                 self.deep_out = tf.nn.relu(tf.add(z_add_p, biases['product-bias']))
                 self.deep_out = tf.nn.dropout(self.deep_out, self.dropout_keep_deep[0])
+
+                # z_p = tf.concat([self.lp, self.lz], axis=1) # z与p进行concat
+                # self.deep_out = tf.nn.dropout(z_p, self.dropout_keep_deep[0])
 
             with tf.name_scope('Hidden_Layer'):
                 num_layer = len(self.deep_layers)
@@ -269,7 +274,8 @@ if __name__ == '__main__':
     y_val = y_val.values.reshape(-1, 1)
 
     model = PNN(feature_size=dataParse.feature_size,
-                   field_size=dataParse.field_size)
+                field_size=dataParse.field_size)
+
     model.fit(train_feature_index, train_feature_val, y_train)
     test_metric = model.evaluate(test_feature_index, test_feature_val, y_val)
     print('test-auc=%.4f' % test_metric)
