@@ -159,6 +159,8 @@ class Wide_Deep(BaseEstimator, TransformerMixin):
 
             # l2 regularization on weights
             if self.l2_reg > 0:
+				if self.use_wide and self.use_deep:
+					self.loss = self.loss + tf.contrib.layers.l2_regularizer(self.l2_reg)(weights['concat_projection'])
                 if self.use_deep:
                     for i in range(len(self.deep_layers)):
                         self.loss = self.loss + tf.contrib.layers.l2_regularizer(self.l2_reg)(
