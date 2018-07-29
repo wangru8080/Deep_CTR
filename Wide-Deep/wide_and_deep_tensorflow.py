@@ -161,9 +161,8 @@ class Wide_Deep(BaseEstimator, TransformerMixin):
             if self.l2_reg > 0:
                 if self.use_deep:
                     for i in range(len(self.deep_layers)):
-                        self.loss = self.loss + self.l2_reg * (
-                                    tf.nn.l2_loss(weights['deep_layer_%s' % i]) + tf.nn.l2_loss(
-                                biases['deep_layer_bias_%s' % i]))
+                        self.loss = self.loss + tf.contrib.layers.l2_regularizer(self.l2_reg)(
+                            weights['deep_layer_%s' % i])
 
             # optimizer
             if self.optimizer_type == 'adam':
