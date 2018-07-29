@@ -22,7 +22,8 @@
 1、 [Wide&Deep](https://github.com/wangru8080/Deep_CTR/tree/master/Wide-Deep)  
 2、 [DeepFM](https://github.com/wangru8080/Deep_CTR/tree/master/DeepFM)  
 3、 [PNN](https://github.com/wangru8080/Deep_CTR/tree/master/PNN)  
-4、 [NFM](https://github.com/wangru8080/Deep_CTR/tree/master/NFM)
+4、 [NFM](https://github.com/wangru8080/Deep_CTR/tree/master/NFM)  
+5、 [DCN](https://github.com/wangru8080/Deep_CTR/tree/master/DCN)  
 
 
   均采用默认参数deep_layer = [32, 32], dropout = [1.0, 1.0, 1.0]
