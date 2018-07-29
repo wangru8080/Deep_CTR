@@ -17,7 +17,7 @@ class DeepFM(BaseEstimator, TransformerMixin):
                  epochs=10, batch_size=128,
                  learning_rate=0.001, optimizer_type='adam',
                  batch_norm=0, batch_norm_decay=0.995,
-                 verbose=True, random_seed=2018,
+                 verbose=True, random_seed=2016,
                  use_fm=True, use_deep=True,
                  loss_type='logloss', metric_type='auc',
                  l2_reg=0.0):
@@ -68,7 +68,7 @@ class DeepFM(BaseEstimator, TransformerMixin):
             weights = {}
             biases = {}
 
-            with tf.name_scope('Embedding_Layer'):
+            with tf.name_scope('init'):
                 weights['feature_embeddings'] = tf.Variable(tf.random_normal([self.feature_size, self.embedding_size], 0.0, 0.01), name='feature_embeddings')
                 self.embeddings = tf.nn.embedding_lookup(weights['feature_embeddings'], self.feature_index)  # [None, field_size, 1]
                 feat_value = tf.reshape(self.feature_value, shape=[-1, self.field_size, 1])  # [None, field_size, 1]
@@ -169,11 +169,11 @@ class DeepFM(BaseEstimator, TransformerMixin):
 
                 # l2 regularization on weights
                 if self.l2_reg > 0:
+                    self.loss = self.loss + tf.contrib.layers.l2_regularizer(self.l2_reg)(weights['concat_projection'])
                     if self.use_deep:
                         for i in range(len(self.deep_layers)):
-                            self.loss = self.loss + self.l2_reg * (
-                                    tf.nn.l2_loss(weights['deep_layer_%s' % i]) + tf.nn.l2_loss(
-                                biases['deep_layer_bias_%s' % i]))
+                            self.loss = self.loss + tf.contrib.layers.l2_regularizer(self.l2_reg)(
+                                weights['deep_layer_%s' % i])
 
                 # optimizer
                 if self.optimizer_type == 'adam':
