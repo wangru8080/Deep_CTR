@@ -139,6 +139,11 @@ class NFM(BaseEstimator, TransformerMixin):
             elif self.loss_type == 'mse':
                 self.loss = tf.nn.l2_loss(tf.subtract(self.label, self.out))
 
+            # l2 regularization on weights
+            if self.l2_reg > 0:
+                for i in range(len(self.deep_layers)):
+                    self.loss = self.loss + tf.contrib.layers.l2_regularizer(self.l2_reg)(weights['deep_layer_%s' % i])
+
             # optimizer
             if self.optimizer_type == 'adam':
                 self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
@@ -254,7 +259,8 @@ if __name__ == '__main__':
     y_val = y_val.values.reshape(-1, 1)
 
     model = NFM(feature_size=dataParse.feature_size,
-                   field_size=dataParse.field_size)
+                   field_size=dataParse.field_size,
+                l2_reg=0.1)
     model.fit(train_feature_index, train_feature_val, y_train)
     test_metric = model.evaluate(test_feature_index, test_feature_val, y_val)
     print('test-auc=%.4f' % test_metric)
