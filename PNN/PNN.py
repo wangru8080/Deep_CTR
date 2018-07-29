@@ -108,7 +108,7 @@ class PNN(BaseEstimator, TransformerMixin):
                 self.lp = tf.concat(quadratic_output, axis=1)  # [N, deep_init_size]
                 z_add_p = tf.add(self.lp, self.lz)
                 self.deep_out = tf.nn.relu(tf.add(z_add_p, biases['product-bias']))
-                self.deep_out = tf.nn.dropout(self.deep_out, self.dropout_keep_deep[0])
+                self.deep_out = tf.nn.dropout(self.deep_out, self.dropout_keep_deep[0]) # [N, deep_init_size]
 
                 # z_p = tf.concat([self.lp, self.lz], axis=1) # z与p进行concat
                 # self.deep_out = tf.nn.dropout(z_p, self.dropout_keep_deep[0])
@@ -159,10 +159,9 @@ class PNN(BaseEstimator, TransformerMixin):
 
             # l2 regularization on weights
             if self.l2_reg > 0:
-                    for i in range(len(self.deep_layers)):
-                        self.loss = self.loss + self.l2_reg * (
-                                tf.nn.l2_loss(weights['deep_layer_%s' % i]) + tf.nn.l2_loss(
-                            biases['deep_layer_bias_%s' % i]))
+                for i in range(len(self.deep_layers)):
+                    self.loss = self.loss + tf.contrib.layers.l2_regularizer(self.l2_reg)(
+                        weights['deep_layer_%s' % i])
 
             # optimizer
             if self.optimizer_type == 'adam':
@@ -273,8 +272,12 @@ if __name__ == '__main__':
     y_train = y_train.values.reshape(-1, 1)
     y_val = y_val.values.reshape(-1, 1)
 
+    n = len(continuous_feature) + len(category_feature)
+    n = int(n * (n - 1) / 2)
+
     model = PNN(feature_size=dataParse.feature_size,
-                field_size=dataParse.field_size)
+                field_size=dataParse.field_size,
+                deep_init_size=n)
 
     model.fit(train_feature_index, train_feature_val, y_train)
     test_metric = model.evaluate(test_feature_index, test_feature_val, y_val)
