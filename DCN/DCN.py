@@ -113,6 +113,7 @@ class DCN(BaseEstimator, TransformerMixin):
             with tf.name_scope('cross_network'):
                 input_size = self.x0.shape.as_list()[1]
                 glorot = np.sqrt(2.0 / (input_size + input_size))
+                # xl+1 = f(xl, wl, bl) + xl
                 for i in range(self.cross_layer_num):
                     weights['cross_layer_%s' % i] = tf.Variable(np.random.normal(loc=0, scale=glorot, size=(input_size, 1)), dtype=np.float32)
                     biases['cross_bias_%s' % i] = tf.Variable(np.random.normal(loc=0, scale=glorot, size=(input_size, 1)), dtype=np.float32)
