@@ -24,7 +24,7 @@ class PNN(BaseEstimator, TransformerMixin):
                  batch_size=128,
                  learning_rate=0.001,
                  optimizer_type='adam',
-                 batch_norm=0,
+                 batch_norm=False,
                  batch_norm_decay=0.995,
                  verbose=True,
                  random_seed=2018,
