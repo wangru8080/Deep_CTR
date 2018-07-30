@@ -16,7 +16,7 @@ class DeepFM(BaseEstimator, TransformerMixin):
                  deep_layers_activation=tf.nn.relu,
                  epochs=10, batch_size=128,
                  learning_rate=0.001, optimizer_type='adam',
-                 batch_norm=0, batch_norm_decay=0.995,
+                 batch_norm=False, batch_norm_decay=0.995,
                  verbose=True, random_seed=2018,
                  use_fm=True, use_deep=True,
                  loss_type='logloss', metric_type='auc',
