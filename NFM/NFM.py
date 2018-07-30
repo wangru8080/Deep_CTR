@@ -27,7 +27,7 @@ class NFM(BaseEstimator, TransformerMixin):
                  batch_norm=0,
                  batch_norm_decay=0.995,
                  verbose=True,
-                 random_seed=2016,
+                 random_seed=2018,
                  loss_type='logloss',
                  metric_type='auc',
                  l2_reg=0.0):
