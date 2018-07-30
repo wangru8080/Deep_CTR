@@ -73,7 +73,7 @@ class NFM(BaseEstimator, TransformerMixin):
                 self.embeddings = tf.nn.embedding_lookup(weights['feature_embeddings'],
                                                          self.feature_index)  # [None, field_size, embedding_size]
                 feat_value = tf.reshape(self.feature_value, shape=[-1, self.field_size, 1])  # [None, field_size, 1]
-                self.embeddings = tf.multiply(self.embeddings, feat_value)  # [None, field_size, 1]
+                self.embeddings = tf.multiply(self.embeddings, feat_value)  # [None, field_size, embedding_size]
 
             with tf.name_scope('linear_part'):
                 biases['feature_bias'] = tf.Variable(tf.random_uniform([self.feature_size, 1], 0.0, 1.0),
