@@ -26,7 +26,4 @@
 5、 [DCN](https://github.com/wangru8080/Deep_CTR/tree/master/DCN)  
 6、 [AFM](https://github.com/wangru8080/Deep_CTR/tree/master/AFM)  
 
-
-  均采用默认参数deep_layer = [32, 32], dropout = [1.0, 1.0, 1.0]，未使用BN
-
 目前整理代码中。。。
