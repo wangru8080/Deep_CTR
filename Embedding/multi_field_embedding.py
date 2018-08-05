@@ -11,7 +11,7 @@ print(df)
 
 ```
 df:
-id
+name
 a|b|c
 d|a|e|c
 f|g|b|c|a
