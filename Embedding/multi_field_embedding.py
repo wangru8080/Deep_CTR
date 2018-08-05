@@ -74,6 +74,12 @@ multi_mask = tf.concat([multi_mask for i in range(embedding_size)], axis=-1) # [
 
 multi_embedding = tf.multiply(embedding, multi_mask) # [None, maxlen, embedding_size]
 
+padding_length = tf.concat([tf.expand_dims(dynamic_length, axis=-1) for i in range(embedding_size)], axis=-1) # [None, embedding_size]
+
+multi_embedding = tf.reduce_sum(multi_embedding, axis=1) # [None, embedding_size]
+
+multi_embedding = tf.div(multi_embedding, tf.to_float(padding_length)) # [None, embedding_size] mean pooling
+
 init = tf.global_variables_initializer()
 with tf.Session() as sess:
     sess.run(init)
