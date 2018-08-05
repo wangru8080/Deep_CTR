@@ -22,3 +22,5 @@
 3、计算每个值的索引号，对于当前行长度不足maxlen的用0补充，[[1, 2, 3, 0, 0], [4, 1, 5, 6, 0], [5, 7, 8, 6, 9]]  
 4、然后进行embedding_lookup，得到embedding向量  
 5、为了过滤多加的值对最终结果的影响，需进行mean pooling操作  
+
+最后将所有的Embedding Vector进行concat即可
