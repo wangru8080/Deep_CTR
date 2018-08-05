@@ -14,3 +14,11 @@
 
 #### 2、Dense Vector
 离散特征经过embedding后与连续特征进行concat
+
+### 多值离散特征的Embedding方法
+某一个特征的embedding  
+1、计算当前特征的最长的长度maxlen, maxlen=5  
+2、计算每行长度，[3, 4, 5]
+3、计算每个值的索引号，对于当前行长度不足maxlen的用0补充，[[1, 2, 3, 0, 0], [4, 1, 5, 6, 0], [5, 7, 8, 6, 9]]  
+4、然后进行embedding_lookup，得到embedding向量  
+5、为了过滤多加的值对最终结果的影响，需进行mean pooling操作  
