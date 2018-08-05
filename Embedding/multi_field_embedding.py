@@ -24,8 +24,6 @@ for data in df['name'].values:
         maxlen = len(ds)
 print('maxlen=', maxlen)
 
-embedding_size = 3
-
 index = {}
 count = 1
 for data in df['name'].values:
