@@ -169,11 +169,15 @@ class DeepFM(BaseEstimator, TransformerMixin):
 
                 # l2 regularization on weights
                 if self.l2_reg > 0:
-                    self.loss = self.loss + tf.contrib.layers.l2_regularizer(self.l2_reg)(weights['concat_projection'])
-                    if self.use_deep:
-                        for i in range(len(self.deep_layers)):
-                            self.loss = self.loss + tf.contrib.layers.l2_regularizer(self.l2_reg)(
-                                weights['deep_layer_%s' % i])
+                    # self.loss = self.loss + tf.contrib.layers.l2_regularizer(self.l2_reg)(weights['concat_projection'])
+                    # if self.use_deep:
+                    #     for i in range(len(self.deep_layers)):
+                    #         self.loss = self.loss + tf.contrib.layers.l2_regularizer(self.l2_reg)(
+                    #             weights['deep_layer_%s' % i])
+                    reg_loss = 0
+                    for tf_var in tf.trainable_variables():
+                        reg_loss = reg_loss + tf.reduce_mean(tf.nn.l2_loss(tf_var))
+                    self.loss = self.loss + self.l2_reg * reg_loss
 
                 # optimizer
                 if self.optimizer_type == 'adam':
