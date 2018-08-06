@@ -33,6 +33,7 @@ class Embedding:
 
         # category -> Embedding
         self.embedding = tf.nn.embedding_lookup(weights['category_embedding'], ids=self.cate_index) # [None, category_field_size, embedding_size]
+        # self.embedding = tf.keras.layers.Embedding(input_dim=self.category_size, output_dim=self.embedding_size)(self.cate_index)
         self.embedding = tf.reshape(self.embedding, shape=[-1, self.category_field_size * self.embedding_size]) # [None, category_field_size * embedding_size]
         # concat Embedding Vector & continuous -> Dense Vector
         self.dense_vector = tf.concat([self.embedding, self.continuous], axis=1)
