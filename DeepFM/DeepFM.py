@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.metrics import roc_auc_score, log_loss， accuracy_score
+from sklearn.metrics import roc_auc_score, log_loss, accuracy_score
 import time
 from tensorflow.contrib.layers.python.layers import batch_norm as batch_norm
 from DataParse import DataParse
