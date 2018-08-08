@@ -25,5 +25,6 @@
 4、 [NFM](https://github.com/wangru8080/Deep_CTR/tree/master/NFM)  
 5、 [DCN](https://github.com/wangru8080/Deep_CTR/tree/master/DCN)  
 6、 [AFM](https://github.com/wangru8080/Deep_CTR/tree/master/AFM)  
+7、 [FNN](https://github.com/wangru8080/Deep_CTR/tree/master/FNN)  
 
 目前整理代码中。。。
