@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.metrics import roc_auc_score, log_loss
+from sklearn.metrics import roc_auc_score, log_loss, accuracy_score
 import time
 from tensorflow.contrib.layers.python.layers import batch_norm as batch_norm
 from DataParse import DataParse
@@ -254,6 +254,14 @@ class DCN(BaseEstimator, TransformerMixin):
             return roc_auc_score(label, y_pred)
         elif self.metric_type == 'logloss':
             return log_loss(label, y_pred)
+        elif self.metric_type == 'acc':
+            predict_items = []
+            for item in y_pred:
+                if item > 0.5:
+                    predict_items.append(1)
+                else:
+                    predict_items.append(0)
+            return accuracy_score(label, np.array(predict_items).reshape(-1, 1))
 
 if __name__ == '__main__':
     print('read dataset...')
