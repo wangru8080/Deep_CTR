@@ -303,8 +303,14 @@ class Wide_Deep(BaseEstimator, TransformerMixin):
         y_pred = self.predict(wide_input, deep_input, category_index)
         if self.metric_type == 'auc':
             return roc_auc_score(label, y_pred)
-        elif self.metric_type == 'accuracy':
-            return accuracy_score(label, y_pred)
+	elif self.metric_type == 'acc':
+            predict_items = []
+            for item in y_pred:
+                if item > 0.5:
+                    predict_items.append(1)
+                else:
+                    predict_items.append(0)
+            return accuracy_score(label, np.array(predict_items).reshape(-1, 1))
         elif self.metric_type == 'logloss':
             return log_loss(label, y_pred)
         elif self.metric_type == 'rmse':
