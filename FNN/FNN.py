@@ -96,10 +96,11 @@ class FNN(BaseEstimator, TransformerMixin):
             with tf.name_scope('Hidden_Layer'):
                 self.deep_out = tf.keras.layers.Dense(self.deep_layers[0], activation=self.deep_layers_activation)(self.fm_out)
                 for i in range(1, len(self.deep_layers)):
-                    self.deep_out = tf.keras.layers.Dense(self.deep_layers[i], activation=self.deep_layers_activation)(self.deep_out)
+                    self.deep_out = tf.keras.layers.Dense(self.deep_layers[i], activation=None)(self.deep_out)
                     if self.batch_norm:
                         self.deep_out = self.batch_norm_layer(self.deep_out, train_phase=self.train_phase,
                                                               scope_bn='bn_%s' % i)
+                    self.depp_out = self.deep_layers_activation(self.deep_out)
                     self.deep_out = tf.nn.dropout(self.deep_out, self.dropout_keep_deep[i + 1])
 
             with tf.name_scope('out'):
