@@ -100,7 +100,7 @@ class DCN(BaseEstimator, TransformerMixin):
                         np.random.normal(loc=0, scale=glorot, size=(1, self.deep_layers[i])),
                         dtype=np.float32)
 
-                self.deep_out = self.x0
+                self.deep_out = tf.nn.dropout(self.x0, self.dropout_keep_deep[0])
                 for i in range(0, num_layer):
                     self.deep_out = tf.add(tf.matmul(self.deep_out, weights['deep_layer_%s' % i]),
                                            biases['deep_layer_bias_%s' % i])
