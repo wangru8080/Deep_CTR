@@ -16,8 +16,11 @@
 论文讲解： https://zhuanlan.zhihu.com/p/38613747  
 > * DCN: [Deep & Cross Network for Ad Click Predictions](https://arxiv.org/pdf/1708.05123.pdf)  
 论文讲解： https://zhuanlan.zhihu.com/p/38863135
-> * xDeepFM: [xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems](https://arxiv.org/pdf/1803.05170.pdf)  
-论文讲解：https://zhuanlan.zhihu.com/p/39605775
+> * xDeepFM: [xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems](https://arxiv.org/pdf/1803.05170.pdf) 
+论文讲解：https://zhuanlan.zhihu.com/p/39605775  
+> * CCPM: [A Convolutional Click Prediction Model](http://nlpr-web.ia.ac.cn/english/irds/People/sw/Liu2015CCPM.pdf)  
+论文讲解：https://zhuanlan.zhihu.com/p/41659646  
+
 ### 实验效果
 1、 [Wide&Deep](https://github.com/wangru8080/Deep_CTR/tree/master/Wide-Deep)  
 2、 [DeepFM](https://github.com/wangru8080/Deep_CTR/tree/master/DeepFM)  
@@ -26,5 +29,6 @@
 5、 [DCN](https://github.com/wangru8080/Deep_CTR/tree/master/DCN)  
 6、 [AFM](https://github.com/wangru8080/Deep_CTR/tree/master/AFM)  
 7、 [FNN](https://github.com/wangru8080/Deep_CTR/tree/master/FNN)  
+7、 [CCPM](https://github.com/wangru8080/Deep_CTR/tree/master/CCPM)  
 
 目前整理代码中。。。
