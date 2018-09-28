@@ -30,5 +30,6 @@
 6、 [AFM](https://github.com/wangru8080/Deep_CTR/tree/master/AFM)  
 7、 [FNN](https://github.com/wangru8080/Deep_CTR/tree/master/FNN)  
 8、 [CCPM](https://github.com/wangru8080/Deep_CTR/tree/master/CCPM)  
+9、 [xDeepFM](https://github.com/wangru8080/Deep_CTR/tree/master/xDeepFM)  
 
 目前整理代码中。。。
