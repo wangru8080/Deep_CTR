@@ -70,31 +70,10 @@ class FNN(BaseEstimator, TransformerMixin):
                 self.embeddings = tf.keras.layers.Embedding(input_dim=self.feature_size, output_dim=self.embedding_size)(self.feature_index) # [[None, field_size, embedding_size]]
                 feat_value = tf.reshape(self.feature_value, shape=[-1, self.field_size, 1])  # [None, field_size, 1]
                 self.embeddings = tf.multiply(self.embeddings, feat_value) # [None, field_size, embedding_size]
+                self.deep_in = tf.reshape(self.embeddings, [-1, self.field_size * self.embedding_size])
 
-            with tf.name_scope('FM'):
-                # linear part
-                self.linear_part = tf.keras.layers.Embedding(input_dim=self.feature_size, output_dim=1)(self.feature_index) # [None, field_size, 1]
-                self.linear_part = tf.reduce_sum(tf.multiply(self.linear_part, feat_value), axis=2)  # [None, field_size]
-                self.linear_part = tf.nn.dropout(self.linear_part, self.dropout_keep_fm[0])  # [None, field_size]
-
-                # second_order
-                self.summed_features_emb = tf.reduce_sum(self.embeddings, 1)  # [None, embedding_size]
-                self.summed_features_emb_square = tf.square(self.summed_features_emb)  # [None, embedding_size]
-                self.squared_features_emb = tf.square(self.embeddings)
-                self.squared_sum_features_emb = tf.reduce_sum(self.squared_features_emb, 1)  # [None, embedding_size]
-                self.y_second_order = 0.5 * tf.subtract(self.summed_features_emb_square, self.squared_sum_features_emb)  # [None, embedding_size]
-                self.y_second_order = tf.nn.dropout(self.y_second_order, self.dropout_keep_fm[1])  # [None, embedding_size]
-
-                self.fm_out = tf.concat([self.linear_part, self.y_second_order], axis=1) # [None, embedding_size+field_size]
-
-                # w0
-                weights['w0'] = tf.Variable(tf.constant(0.1), name='w0')
-                self.y_w0 = tf.multiply(weights['w0'], tf.ones_like(self.fm_out)) # [None, embedding_size+field_size]
-
-                self.fm_out = self.y_w0 + self.fm_out # yFM = w0 + wixi + <vi, vj>xixj
-
-            with tf.name_scope('Hidden_Layer'):
-                self.deep_out = tf.nn.dropout(self.fm_out, self.dropout_keep_deep[0])
+            with tf.name_scope('MLP'):
+                self.deep_out = tf.nn.dropout(self.deep_in, self.dropout_keep_deep[0])
                 for i in range(0, len(self.deep_layers)):
                     self.deep_out = tf.keras.layers.Dense(self.deep_layers[i], activation=None)(self.deep_out)
                     if self.batch_norm:
@@ -153,6 +132,7 @@ class FNN(BaseEstimator, TransformerMixin):
                                   is_training=False, reuse=True, trainable=True, scope=scope_bn)
         z = tf.cond(train_phase, lambda: bn_train, lambda: bn_inference)
         return z
+
 
     def fit(self, feat_index, feat_val, label, valid_feat_index=None, valid_feat_val=None, valid_label=None):
         '''
@@ -242,7 +222,9 @@ if __name__ == '__main__':
     y_val = y_val.values.reshape(-1, 1)
 
     model = FNN(feature_size=dataParse.feature_size,
-                   field_size=dataParse.field_size)
+                field_size=dataParse.field_size,
+                batch_norm=True,
+                metric_type='auc')
     model.fit(train_feature_index, train_feature_val, y_train)
     test_metric = model.evaluate(test_feature_index, test_feature_val, y_val)
     print('test-auc=%.4f' % test_metric)
