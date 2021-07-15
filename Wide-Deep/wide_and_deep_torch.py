@@ -15,6 +15,7 @@ import pandas as pd
 from collections import OrderedDict
 from tqdm import tqdm
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, accuracy_score
+from sklearn.preprocessing import LabelEncoder
 
 class WideDeep(nn.Module):
     def __init__(self, args):
@@ -72,7 +73,7 @@ class Config(object):
         self.sparse_features_size = 8
         self.cate_fea_uniques = []
 
-        self.num_train_epochs = 10
+        self.num_train_epochs = 5
         self.per_gpu_batch_size = 128
         self.learning_rate = 1e-3
         self.gpuid = '-1'
@@ -99,8 +100,34 @@ if __name__ == '__main__':
     sparse_features = ['workclass', 'education', 'marital_status', 'occupation', 'relationship', 'race', 'sex', 'native_country']
     label_name = 'income_label'
 
-    cate_fea_uniques = [data[f].nunique() for f in sparse_features] # [9, 16, 7, 15, 6, 5, 2, 42]
+    # 交叉特征
+    cross_feature = [['education', 'occupation'], ['native_country', 'occupation']]
+    cross_name = ['_'.join(col) for col in cross_feature]
+    crossed_columns = {}
+    for name, cross in zip(cross_name, cross_feature):
+        crossed_columns[name] = cross
+
+    df_cross = pd.DataFrame()
+    for k, v in crossed_columns.items():
+        data[k] = data[v].astype(str).apply(lambda x: '-'.join(x), axis=1)
+
+    lbc = LabelEncoder()
+    print('start label encoder')
+    for col in cross_name:
+        print('this feature is', col)
+        try:
+            data[col] = lbc.fit_transform(data[col].apply(int))
+        except:
+            data[col] = lbc.fit_transform(data[col].astype(str))
+    train[cross_name] = data[cross_name][0: len(train)]
+    test[cross_name] = data[cross_name][len(train):]
+
+    # sparse_features = sparse_features + cross_name # 加入交叉特征
+    cate_fea_uniques = [data[f].nunique() for f in sparse_features] # [9, 16, 7, 15, 6, 5, 2, 42] [225, 481]
     args.cate_fea_uniques = cate_fea_uniques
+
+    args.sparse_features_size = len(sparse_features)
+    args.dense_features_size = len(dense_features)
 
     train_dataset = TensorDataset(
         torch.tensor(train[sparse_features].values, dtype=torch.long),
